@@ -7,7 +7,7 @@ from typing import Sequence, Dict, Any, Optional, Union
 Json = Dict[str, Any]
 
 
-def Parser(*args, **kwargs):
+def Parser(*args, **kwargs) -> argparse.ArgumentParser:
     # just more reasonable default for literate usage
     return argparse.ArgumentParser( # type: ignore[misc]
         *args,
@@ -16,7 +16,7 @@ def Parser(*args, **kwargs):
     )
 
 
-def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: Optional[str]=None):
+def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: Optional[str]=None) -> None:
     PARAMS_KEY = 'params'
 
     # eh, doesn't seem to be possible to achieve this via mutually exclusive groups in argparse...
@@ -129,36 +129,5 @@ I *highly* recommend checking exported files at least once just to make sure the
         help='Optional path where exported data will be dumped, otherwise printed to stdout',
     )
 
-
-import logging
-def setup_logger(logger: Union[str, logging.Logger], level='DEBUG', **kwargs):
-    """
-    Wrapper to simplify logging setup.
-    """
-    def mklevel(level: Union[int, str]) -> int:
-        if isinstance(level, str):
-            return getattr(logging, level)
-        else:
-            return level
-    lvl = mklevel(level)
-
-    if isinstance(logger, str):
-        logger = logging.getLogger(logger)
-
-    try:
-        # try logzero first, so user gets nice colored logs
-        import logzero  # type: ignore
-        # TODO meh, default formatter shorthands logging levels making it harder to search errors..
-    except ModuleNotFoundError:
-        import warnings
-        warnings.warn("You might want to install 'logzero' for nice colored logs")
-
-        # ugh. why does it have to be so verbose?
-        logger.setLevel(lvl)
-        ch = logging.StreamHandler()
-        ch.setLevel(lvl)
-        FMT = '[%(levelname)s %(name)s %(asctime)s %(filename)s:%(lineno)d] %(message)s'
-        ch.setFormatter(logging.Formatter(FMT))
-        logger.addHandler(ch)
-    else:
-        logzero.setup_logger(logger.name, level=lvl)
+# legacy: function used to be in this file
+from .logging_helper import setup_logger

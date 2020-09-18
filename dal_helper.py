@@ -24,7 +24,7 @@ T = TypeVar('T')
 Res = Union[T, Exception]
 
 
-def make_parser(single_source=False):
+def make_parser(single_source=False) -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         'DAL (Data Access/Abstraction Layer)',
         formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100), # type: ignore
@@ -64,7 +64,7 @@ I elaborate on motivation behind it [[https://beepb00p.xyz/exports.html#dal][her
     return p
 
 
-def main(*, DAL, demo=None, single_source=False):
+def main(*, DAL, demo=None, single_source=False) -> None:
     """
     single_source: used when exports are not cumulative/synthetic
     (you can find out more about it here: https://beepb00p.xyz/exports.html#types)
@@ -96,22 +96,11 @@ def main(*, DAL, demo=None, single_source=False):
         assert demo is not None, "No 'demo' in 'dal.py'?"
         demo(dal)
 
-
-def logger(logger, **kwargs):
-    # TODO FIXME vendorize
-    try:
-        # pylint: disable=import-error
-        from kython.klogging import LazyLogger # type: ignore
-    except ModuleNotFoundError as ie:
-        import logging
-        logging.exception(ie)
-        logging.warning('fallback to default logger!')
-        return logging.getLogger(logger)
-    else:
-        return LazyLogger(logger, **kwargs)
-
+# legacy: logger function used to be in this file
+from .logging_helper import logger
 
 from typing import Iterable
+# todo rename to only, like in more_itertools?
 def the(l: Iterable[T]) -> T:
     it = iter(l)
     try:
@@ -120,34 +109,3 @@ def the(l: Iterable[T]) -> T:
         raise RuntimeError('Empty iterator?')
     assert all(e == first for e in it)
     return first
-
-
-def fix_imports(dal_globs):
-    '''
-    TLDR: this is necessary to allow running dal.py both as interactive script and import it as a library.
-    Without this, you have to duplicate all imports to support __main__ version (absolute) and package version (relative, dotted).
-    '''
-    import sys
-
-    dal_path = Path(dal_globs['__file__'])
-    dal_dir = dal_path.absolute().parent
-    module_name = dal_dir.name
-
-    # 1. set package name to directory name, as if we imported the module from elsewhere
-    dal_globs['__package__'] = module_name
-
-    from importlib.machinery import ModuleSpec
-    from importlib.util import module_from_spec
-
-    # 2. create fake parent 'module'
-    spec = ModuleSpec(
-        name=module_name,
-        loader=None,  # None for namespace packages
-        is_package=True,
-    )
-    locs = spec.submodule_search_locations
-    assert locs is not None
-    # add to search path for relative to work properly
-    locs.append(str(dal_dir))
-    module = module_from_spec(spec)
-    sys.modules[module_name] = module
