@@ -14,17 +14,20 @@ __all__ = [
 import argparse
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, Union, TypeVar
+from typing import Any, Dict, Union, TypeVar, Optional
 
 PathIsh = Union[str, Path]
-Json = Dict[str, Any] # TODO Mapping?
+Json = Dict[str, Any] # todo Mapping?
 
 
 T = TypeVar('T')
 Res = Union[T, Exception]
 
 
-def make_parser(single_source=False) -> argparse.ArgumentParser:
+def make_parser(single_source=False, package: Optional[str]=None) -> argparse.ArgumentParser:
+    # meh..
+    pkg = __package__.split('.')[0] if package is None else package
+
     p = argparse.ArgumentParser(
         'DAL (Data Access/Abstraction Layer)',
         formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100), # type: ignore
@@ -39,7 +42,7 @@ def make_parser(single_source=False) -> argparse.ArgumentParser:
         required=True,
         help=source_help,
     )
-    # TODO link to exports post why multiple exports could be useful
+    # todo link to exports post why multiple exports could be useful
     if not single_source:
         p.add_argument(
             '--no-glob',
@@ -48,17 +51,17 @@ def make_parser(single_source=False) -> argparse.ArgumentParser:
         )
     p.add_argument('-i', '--interactive', action='store_true', help='Start Ipython session to play with data')
 
-    p.epilog = """
-You can use =dal.py= (stands for "Data Access/Abstraction Layer") to access your exported data, even offline.
+    p.epilog = f"""
+You can use ={pkg}.dal= (stands for "Data Access/Abstraction Layer") to access your exported data, even offline.
 I elaborate on motivation behind it [[https://beepb00p.xyz/exports.html#dal][here]].
 
 - main usecase is to be imported as python module to allow for *programmatic access* to your data.
 
   You can find some inspiration in [[https://beepb00p.xyz/mypkg.html][=my.=]] package that I'm using as an API to all my personal data.
 
-- to test it against your export, simply run: ~./dal.py --source /path/to/export~
+- to test it against your export, simply run: ~python3 -m {pkg}.dal --source /path/to/export~
 
-- you can also try it interactively: ~./dal.py --source /path/to/export --interactive~
+- you can also try it interactively: ~python3 -m {pkg}.dal --source /path/to/export --interactive~
 
 """
     return p

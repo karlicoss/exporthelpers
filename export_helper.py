@@ -16,18 +16,19 @@ def Parser(*args, **kwargs) -> argparse.ArgumentParser:
     )
 
 
-def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: Optional[str]=None) -> None:
-    PARAMS_KEY = 'params'
+def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: Optional[str]=None, package: Optional[str]=None) -> None:
+    # meh..
+    pkg = __package__.split('.')[0] if package is None else package
 
-    # eh, doesn't seem to be possible to achieve this via mutually exclusive groups in argparse...
-    # and still, cryptic error message if you forget to specify either :(
+    PARAMS_KEY = 'params'
     set_from_file = False
     set_from_cmdl = False
 
+    use_secrets = RuntimeError("Please use either --secrets file or individual --param arguments (see --help)")
     class SetParamsFromFile(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
             if set_from_cmdl:
-                raise RuntimeError("Please use either --secrets or individual --param arguments")
+                raise use_secrets
             nonlocal set_from_file; set_from_file = True
 
             secrets_file = values
@@ -47,7 +48,7 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
     class SetParam(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
             if set_from_file:
-                raise RuntimeError("Please use either --secrets or individual --param arguments")
+                raise use_secrets
             nonlocal set_from_cmdl; set_from_cmdl = True
 
             pdict = getattr(namespace, PARAMS_KEY, {})
@@ -74,7 +75,6 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
             setattr(namespace, 'dumper', dumper)
 
     paramss = ' '.join(f'--{p} <{p}>' for p in params)
-    # TODO extract export programmatically?
 
     sep = '\n: '
     secrets_example = sep + sep.join(f'{p} = "{p.upper()}"' for p in params)
@@ -89,13 +89,13 @@ Usage:
 
 After that, use:
 
-: ./export.py --secrets /path/to/secrets.py
+: python3 -m {pkg}.export --secrets /path/to/secrets.py
 
 That way you type less and have control over where you keep your plaintext secrets.
 
 *Alternatively*, you can pass parameters directly, e.g.
 
-: ./export.py {paramss}
+: python3 -m {pkg}.export {paramss}
 
 However, this is verbose and prone to leaking your keys/tokens/passwords in shell history.
 
@@ -120,6 +120,16 @@ I *highly* recommend checking exported files at least once just to make sure the
     gr = parser.add_argument_group('API parameters')
     for param in params:
         gr.add_argument('--' + param, type=str, action=SetParam)
+
+
+    # hack to avoid cryptic error messages when you forget to specify secrets file/cmdline args
+    # ok, judging by argparse code, it's safe to assume this will be called at the very end
+    # https://github.com/python/cpython/blob/9c4eac7f02ddcf32fc1cdaf7c08c37fe9718c1fb/Lib/argparse.py#L2068-L2079
+    def check_params(*args):
+        if not set_from_file and not set_from_cmdl:
+            raise use_secrets
+    # todo would be nice to omit if from help
+    parser.add_argument('--check-params-hook', type=check_params, default='', help="internal argument, please don't use")
 
     parser.add_argument(
         'path',
