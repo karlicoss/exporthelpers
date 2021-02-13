@@ -104,6 +104,8 @@ from .logging_helper import logger
 
 from typing import Iterable
 # todo rename to only, like in more_itertools?
+# although it's not exactly the same, i.e. also checks that they are all equal..
+# and turning to a set() isn't always an option because it's a hash set
 def the(l: Iterable[T]) -> T:
     it = iter(l)
     try:
@@ -112,3 +114,7 @@ def the(l: Iterable[T]) -> T:
         raise RuntimeError('Empty iterator?')
     assert all(e == first for e in it)
     return first
+
+from datetime import datetime
+datetime_naive = datetime # for now just an alias
+datetime_aware = datetime # for now just an alias
