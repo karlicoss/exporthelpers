@@ -6,6 +6,7 @@ If you know how to make any of this easier, please let me know!
 
 __all__ = [
     'PathIsh',
+    'pathify',
     'Json',
     'Res',
     'the',
@@ -17,6 +18,20 @@ from pathlib import Path
 from typing import Any, Dict, Union, TypeVar, Optional
 
 PathIsh = Union[str, Path]
+
+
+def pathify(path: PathIsh) -> Path:
+    """
+    Helper mainly to support CPath hack
+    See https://github.com/karlicoss/HPI/blob/be21606075cbc15018d1f36c2581ab138e4a44cc/tests/misc.py#L29-L32
+    Otherwise if we do Path(CPath(...)), it will ruin the decompression hack
+    """
+    if isinstance(path, Path):
+        return path
+    else:
+        return Path(path)
+
+
 Json = Dict[str, Any] # todo Mapping?
 
 
