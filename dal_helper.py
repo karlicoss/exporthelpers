@@ -13,9 +13,11 @@ __all__ = [
 ]
 
 import argparse
+from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, Union, TypeVar, Optional
+from typing import Any, Dict, Union, TypeVar, Optional, Iterator
+import warnings
 
 PathIsh = Union[str, Path]
 
@@ -130,6 +132,40 @@ def the(l: Iterable[T]) -> T:
     assert all(e == first for e in it)
     return first
 
-from datetime import datetime
-datetime_naive = datetime # for now just an alias
-datetime_aware = datetime # for now just an alias
+
+datetime_naive = datetime  # for now just an alias
+datetime_aware = datetime  # for now just an alias
+
+
+def json_items(p: Path, key: Optional[str]) -> Iterator[Json]:
+    # if key is None, means we expect list on the top level
+
+    # todo perhaps add to setup.py as 'optional' or 'faster'?
+    try:
+        import ijson  # type: ignore[import]
+        # todo would be nice to debug output the backend?
+    except:
+        warnings.warn("recommended to 'pip install ijson' for faster json processing")
+    else:
+        extractor = 'item' if key is None else f'{key}.item'
+        with p.open('rb') as fo:
+            yield from ijson.items(fo, extractor, use_float=True)
+        return
+
+    try:
+        import orjson
+    except:
+        warnings.warn("recommended to 'pip install orjson' for faster json processing")
+    else:
+        j = orjson.loads(p.read_text())
+        if key is not None:
+            j = j[key]
+        yield from j
+        return
+
+    # otherwise just fall back onto regular json
+    import json
+    j = json.loads(p.read_text())
+    if key is not None:
+        j = j[key]
+    yield from j
