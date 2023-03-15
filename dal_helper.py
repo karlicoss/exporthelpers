@@ -148,7 +148,7 @@ def json_items(p: Path, key: Optional[str]) -> Iterator[Json]:
         warnings.warn("recommended to 'pip install ijson' for faster json processing")
     else:
         extractor = 'item' if key is None else f'{key}.item'
-        with p.open('rb') as fo:
+        with p.open(mode='rb') as fo:
             yield from ijson.items(fo, extractor, use_float=True)
         return
 
