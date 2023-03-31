@@ -11,7 +11,7 @@ def Parser(*args, **kwargs) -> argparse.ArgumentParser:
     # just more reasonable default for literate usage
     return argparse.ArgumentParser( # type: ignore[misc]
         *args,
-        formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100), # type: ignore
+        formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100),
         **kwargs,
     )
 

@@ -47,7 +47,7 @@ def make_parser(single_source=False, package: Optional[str]=None) -> argparse.Ar
 
     p = argparse.ArgumentParser(
         'DAL (Data Access/Abstraction Layer)',
-        formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100), # type: ignore
+        formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100),
     )
     source_help = 'Path to exported data'
     if not single_source:
