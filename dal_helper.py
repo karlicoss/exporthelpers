@@ -142,9 +142,13 @@ def json_items(p: Path, key: Optional[str]) -> Iterator[Json]:
 
     # todo perhaps add to setup.py as 'optional' or 'faster'?
     try:
-        import ijson  # type: ignore[import]
+        import ijson  # type: ignore[import-untyped]
         # todo would be nice to debug output the backend?
-    except:
+    except ModuleNotFoundError as e:
+        if e.name != 'ijson':
+            # this may happen if the user requested a specific ijson backend (e.g. via IJSON_BACKEND)
+            # worth being non-defensive in that case
+            raise e
         warnings.warn("recommended to 'pip install ijson' for faster json processing")
     else:
         extractor = 'item' if key is None else f'{key}.item'
@@ -154,7 +158,9 @@ def json_items(p: Path, key: Optional[str]) -> Iterator[Json]:
 
     try:
         import orjson
-    except:
+    except ModuleNotFoundError as e:
+        if e.name != 'orjson':
+            raise e
         warnings.warn("recommended to 'pip install orjson' for faster json processing")
     else:
         j = orjson.loads(p.read_text())
