@@ -3,6 +3,7 @@ This file is shared among all most of my export scripts and contains various boi
 
 If you know how to make any of this easier, please let me know!
 """
+from __future__ import annotations
 
 __all__ = [
     'PathIsh',
@@ -13,11 +14,11 @@ __all__ = [
 ]
 
 import argparse
+import warnings
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, Union, TypeVar, Optional, Iterator
-import warnings
+from typing import Any, Dict, Iterator, TypeVar, Union
 
 PathIsh = Union[str, Path]
 
@@ -41,7 +42,7 @@ T = TypeVar('T')
 Res = Union[T, Exception]
 
 
-def make_parser(single_source=False, package: Optional[str]=None) -> argparse.ArgumentParser:
+def make_parser(*, single_source: bool = False, package: str | None = None) -> argparse.ArgumentParser:
     # meh..
     pkg = __package__.split('.')[0] if package is None else package
 
@@ -96,11 +97,11 @@ def main(*, DAL, demo=None, single_source=False) -> None:
         dal = DAL(args.source)
     else:
         if '*' in args.source and not args.no_glob:
-            sources = glob(args.source)
+            sources = glob(args.source)  # noqa: PTH207
         else:
             ps = Path(args.source)
             if ps.is_dir():
-                sources = list(sorted(ps.iterdir())) # hopefully, makes sense?
+                sources = sorted(ps.iterdir()) # hopefully, makes sense?
             else:
                 sources = [ps]
         dal = DAL(sources)
@@ -110,16 +111,17 @@ def main(*, DAL, demo=None, single_source=False) -> None:
     # TODO autoreload would be nice... https://github.com/ipython/ipython/issues/1144
     # TODO maybe just launch through ipython in the first place?
     if args.interactive:
-        import IPython # type: ignore
+        import IPython  # type: ignore
         IPython.embed(header="Feel free to mess with 'dal' object in the interactive shell")
     else:
         assert demo is not None, "No 'demo' in 'dal.py'?"
         demo(dal)
 
 # legacy: logger function used to be in this file
-from .logging_helper import logger
 
 from typing import Iterable
+
+
 # todo rename to only, like in more_itertools?
 # although it's not exactly the same, i.e. also checks that they are all equal..
 # and turning to a set() isn't always an option because it's a hash set
@@ -128,7 +130,7 @@ def the(l: Iterable[T]) -> T:
     try:
         first = next(it)
     except StopIteration as ee:
-        raise RuntimeError('Empty iterator?')
+        raise RuntimeError('Empty iterator?')  # noqa: B904
     assert all(e == first for e in it)
     return first
 
@@ -137,7 +139,7 @@ datetime_naive = datetime  # for now just an alias
 datetime_aware = datetime  # for now just an alias
 
 
-def json_items(p: Path, key: Optional[str]) -> Iterator[Json]:
+def json_items(p: Path, key: str | None) -> Iterator[Json]:
     # if key is None, means we expect list on the top level
 
     # todo perhaps add to setup.py as 'optional' or 'faster'?

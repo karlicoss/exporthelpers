@@ -1,8 +1,9 @@
-import argparse
-from pathlib import Path
-import sys
-from typing import Sequence, Dict, Any, Optional, Union
+from __future__ import annotations
 
+import argparse
+import sys
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Sequence
 
 Json = Dict[str, Any]
 
@@ -16,7 +17,7 @@ def Parser(*args, **kwargs) -> argparse.ArgumentParser:
     )
 
 
-def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: Optional[str]=None, package: Optional[str]=None) -> None:
+def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: str | None=None, package: str | None=None) -> None:
     # meh..
     pkg = __package__.split('.')[0] if package is None else package
 
@@ -26,7 +27,7 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
 
     use_secrets = RuntimeError("Please use either --secrets file or individual --param arguments (see --help)")
     class SetParamsFromFile(argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
+        def __call__(self, parser, namespace, values, option_string=None):  # noqa: ARG002
             if set_from_cmdl:
                 raise use_secrets
             nonlocal set_from_file; set_from_file = True
@@ -39,14 +40,14 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
 
             def get(k):
                 if k not in obj:
-                    raise RuntimeError("Couldn't extract '{}' param from file {} (got {})".format(k, secrets_file, obj))
+                    raise RuntimeError(f"Couldn't extract '{k}' param from file {secrets_file} (got {obj})")
                 return obj[k]
 
             pdict = {k: get(k) for k in params}
             setattr(namespace, PARAMS_KEY, pdict)
 
     class SetParam(argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
+        def __call__(self, parser, namespace, values, option_string=None):  # noqa: ARG002
             if set_from_file:
                 raise use_secrets
             nonlocal set_from_cmdl; set_from_cmdl = True
@@ -56,7 +57,7 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
             setattr(namespace, PARAMS_KEY, pdict)
 
     class SetOutput(argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
+        def __call__(self, parser, namespace, values, option_string=None):  # noqa: ARG002
             output_path = values
 
             def dump_to_stdout(data):
@@ -65,7 +66,7 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
             def dump_to_file(data):
                 with output_path.open('w', encoding='utf-8') as fo:
                     fo.write(data)
-                print('saved data to {output_path}'.format(output_path=output_path), file=sys.stderr)
+                print(f'saved data to {output_path}', file=sys.stderr)
 
             if output_path is None:
                 dumper = dump_to_stdout
@@ -125,7 +126,7 @@ I *highly* recommend checking exported files at least once just to make sure the
     # hack to avoid cryptic error messages when you forget to specify secrets file/cmdline args
     # ok, judging by argparse code, it's safe to assume this will be called at the very end
     # https://github.com/python/cpython/blob/9c4eac7f02ddcf32fc1cdaf7c08c37fe9718c1fb/Lib/argparse.py#L2068-L2079
-    def check_params(*args):
+    def check_params(*_args):
         if not set_from_file and not set_from_cmdl:
             raise use_secrets
     # todo would be nice to omit if from help
@@ -140,4 +141,5 @@ I *highly* recommend checking exported files at least once just to make sure the
     )
 
 # legacy: function used to be in this file
-from .logging_helper import setup_logger
+if not TYPE_CHECKING:
+    from .logging_helper import logger  # noqa: F401
