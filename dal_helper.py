@@ -14,6 +14,7 @@ __all__ = [
 ]
 
 import argparse
+import sys
 import warnings
 from datetime import datetime
 from glob import glob
@@ -177,3 +178,15 @@ def json_items(p: Path, key: str | None) -> Iterator[Json]:
     if key is not None:
         j = j[key]
     yield from j
+
+
+if sys.version_info[:2] >= (3, 11):
+    fromisoformat = datetime.fromisoformat
+else:
+    # fromisoformat didn't support Z as "utc" before 3.11
+    # https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat
+
+    def fromisoformat(date_string: str) -> datetime:
+        if date_string.endswith('Z'):
+            date_string = date_string[:-1] + '+00:00'
+        return datetime.fromisoformat(date_string)
