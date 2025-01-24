@@ -6,20 +6,21 @@ If you know how to make any of this easier, please let me know!
 from __future__ import annotations
 
 __all__ = [
-    'PathIsh',
-    'pathify',
     'Json',
+    'PathIsh',
     'Res',
+    'pathify',
     'the',
 ]
 
 import argparse
 import sys
 import warnings
+from collections.abc import Iterator
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, Iterator, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 PathIsh = Union[str, Path]
 
@@ -36,7 +37,7 @@ def pathify(path: PathIsh) -> Path:
         return Path(path)
 
 
-Json = Dict[str, Any] # todo Mapping?
+Json = dict[str, Any] # todo Mapping?
 
 
 T = TypeVar('T')
@@ -112,7 +113,7 @@ def main(*, DAL, demo=None, single_source=False) -> None:
     # TODO autoreload would be nice... https://github.com/ipython/ipython/issues/1144
     # TODO maybe just launch through ipython in the first place?
     if args.interactive:
-        import IPython  # type: ignore
+        import IPython  # type: ignore[import-not-found]
         IPython.embed(header="Feel free to mess with 'dal' object in the interactive shell")
     else:
         assert demo is not None, "No 'demo' in 'dal.py'?"
@@ -120,7 +121,7 @@ def main(*, DAL, demo=None, single_source=False) -> None:
 
 # legacy: logger function used to be in this file
 
-from typing import Iterable
+from collections.abc import Iterable
 
 
 # todo rename to only, like in more_itertools?

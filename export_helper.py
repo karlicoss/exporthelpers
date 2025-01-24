@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Sequence
+from typing import TYPE_CHECKING, Any
 
-Json = Dict[str, Any]
+Json = dict[str, Any]
 
 
 def Parser(*args, **kwargs) -> argparse.ArgumentParser:
@@ -33,7 +34,7 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
             nonlocal set_from_file; set_from_file = True
 
             secrets_file = values
-            obj = {} # type: ignore
+            obj: dict[str, Any] = {}
 
             # we control the file with secrets so exec is fine
             exec(secrets_file.read_text(), {}, obj)
