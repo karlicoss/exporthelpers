@@ -131,7 +131,7 @@ def the(l: Iterable[T]) -> T:
     it = iter(l)
     try:
         first = next(it)
-    except StopIteration as ee:
+    except StopIteration:
         raise RuntimeError('Empty iterator?')  # noqa: B904
     assert all(e == first for e in it)
     return first
