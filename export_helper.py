@@ -11,14 +11,16 @@ Json = dict[str, Any]
 
 def Parser(*args, **kwargs) -> argparse.ArgumentParser:
     # just more reasonable default for literate usage
-    return argparse.ArgumentParser( # type: ignore[misc]
+    return argparse.ArgumentParser(  # type: ignore[misc]
         *args,
         formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100),
         **kwargs,
     )
 
 
-def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: str | None=None, package: str | None=None) -> None:
+def setup_parser(
+    parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: str | None = None, package: str | None = None
+) -> None:
     # meh..
     pkg = __package__.split('.')[0] if package is None else package
 
@@ -27,11 +29,13 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
     set_from_cmdl = False
 
     use_secrets = RuntimeError("Please use either --secrets file or individual --param arguments (see --help)")
+
     class SetParamsFromFile(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):  # noqa: ARG002
             if set_from_cmdl:
                 raise use_secrets
-            nonlocal set_from_file; set_from_file = True
+            nonlocal set_from_file
+            set_from_file = True
 
             secrets_file = values
             obj: dict[str, Any] = {}
@@ -51,7 +55,8 @@ def setup_parser(parser: argparse.ArgumentParser, *, params: Sequence[str], extr
         def __call__(self, parser, namespace, values, option_string=None):  # noqa: ARG002
             if set_from_file:
                 raise use_secrets
-            nonlocal set_from_cmdl; set_from_cmdl = True
+            nonlocal set_from_cmdl
+            set_from_cmdl = True
 
             pdict = getattr(namespace, PARAMS_KEY, {})
             pdict[self.dest] = values
@@ -123,13 +128,13 @@ I *highly* recommend checking exported files at least once just to make sure the
     for param in params:
         gr.add_argument('--' + param, type=str, action=SetParam)
 
-
     # hack to avoid cryptic error messages when you forget to specify secrets file/cmdline args
     # ok, judging by argparse code, it's safe to assume this will be called at the very end
     # https://github.com/python/cpython/blob/9c4eac7f02ddcf32fc1cdaf7c08c37fe9718c1fb/Lib/argparse.py#L2068-L2079
     def check_params(*_args):
         if not set_from_file and not set_from_cmdl:
             raise use_secrets
+
     # todo would be nice to omit if from help
     parser.add_argument('--check-params-hook', type=check_params, default='', help="internal argument, please don't use")
 
@@ -140,6 +145,7 @@ I *highly* recommend checking exported files at least once just to make sure the
         nargs='?',
         help='Optional path where exported data will be dumped, otherwise printed to stdout',
     )
+
 
 # legacy: function used to be in this file
 if not TYPE_CHECKING:

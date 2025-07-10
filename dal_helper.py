@@ -3,6 +3,7 @@ This file is shared among all most of my export scripts and contains various boi
 
 If you know how to make any of this easier, please let me know!
 """
+
 from __future__ import annotations
 
 __all__ = [
@@ -37,7 +38,7 @@ def pathify(path: PathIsh) -> Path:
         return Path(path)
 
 
-Json = dict[str, Any] # todo Mapping?
+Json = dict[str, Any]  # todo Mapping?
 
 
 T = TypeVar('T')
@@ -64,11 +65,7 @@ def make_parser(*, single_source: bool = False, package: str | None = None) -> a
     )
     # todo link to exports post why multiple exports could be useful
     if not single_source:
-        p.add_argument(
-            '--no-glob',
-            action='store_true',
-            help='Treat path in --source literally'
-        )
+        p.add_argument('--no-glob', action='store_true', help='Treat path in --source literally')
     p.add_argument('-i', '--interactive', action='store_true', help='Start Ipython session to play with data')
 
     p.epilog = f"""
@@ -103,7 +100,7 @@ def main(*, DAL, demo=None, single_source=False) -> None:
         else:
             ps = Path(args.source)
             if ps.is_dir():
-                sources = sorted(ps.iterdir()) # hopefully, makes sense?
+                sources = sorted(ps.iterdir())  # hopefully, makes sense?
             else:
                 sources = [ps]
         dal = DAL(sources)
@@ -114,10 +111,12 @@ def main(*, DAL, demo=None, single_source=False) -> None:
     # TODO maybe just launch through ipython in the first place?
     if args.interactive:
         import IPython  # type: ignore[import-not-found]
+
         IPython.embed(header="Feel free to mess with 'dal' object in the interactive shell")
     else:
         assert demo is not None, "No 'demo' in 'dal.py'?"
         demo(dal)
+
 
 # legacy: logger function used to be in this file
 
@@ -175,6 +174,7 @@ def json_items(p: Path, key: str | None) -> Iterator[Json]:
 
     # otherwise just fall back onto regular json
     import json
+
     j = json.loads(p.read_text())
     if key is not None:
         j = j[key]
