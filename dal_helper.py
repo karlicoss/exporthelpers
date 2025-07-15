@@ -47,7 +47,11 @@ Res = Union[T, Exception]
 
 def make_parser(*, single_source: bool = False, package: str | None = None) -> argparse.ArgumentParser:
     # meh..
-    pkg = __package__.split('.')[0] if package is None else package
+    if package is None:
+        assert __package__ is not None
+        pkg = __package__.split('.')[0]
+    else:
+        pkg = package
 
     p = argparse.ArgumentParser(
         'DAL (Data Access/Abstraction Layer)',

@@ -22,7 +22,11 @@ def setup_parser(
     parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: str | None = None, package: str | None = None
 ) -> None:
     # meh..
-    pkg = __package__.split('.')[0] if package is None else package
+    if package is None:
+        assert __package__ is not None
+        pkg = __package__.split('.')[0]
+    else:
+        pkg = package
 
     PARAMS_KEY = 'params'
     set_from_file = False
