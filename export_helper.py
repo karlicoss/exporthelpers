@@ -11,11 +11,9 @@ Json = dict[str, Any]
 
 def Parser(*args, **kwargs) -> argparse.ArgumentParser:
     # just more reasonable default for literate usage
-    return argparse.ArgumentParser(  # type: ignore[misc]
-        *args,
-        formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=100),
-        **kwargs,
-    )
+    if 'formatter_class' not in kwargs:
+        kwargs['formatter_class'] = lambda prog: argparse.RawTextHelpFormatter(prog, width=100)
+    return argparse.ArgumentParser(*args, **kwargs)
 
 
 def setup_parser(
