@@ -17,7 +17,11 @@ def Parser(*args, **kwargs) -> argparse.ArgumentParser:
 
 
 def setup_parser(
-    parser: argparse.ArgumentParser, *, params: Sequence[str], extra_usage: str | None = None, package: str | None = None
+    parser: argparse.ArgumentParser,
+    *,
+    params: Sequence[str],
+    extra_usage: str | None = None,
+    package: str | None = None,
 ) -> None:
     # meh..
     if package is None:
@@ -138,7 +142,9 @@ I *highly* recommend checking exported files at least once just to make sure the
             raise use_secrets
 
     # todo would be nice to omit if from help
-    parser.add_argument('--check-params-hook', type=check_params, default='', help="internal argument, please don't use")
+    parser.add_argument(
+        '--check-params-hook', type=check_params, default='', help="internal argument, please don't use"
+    )
 
     parser.add_argument(
         'path',
