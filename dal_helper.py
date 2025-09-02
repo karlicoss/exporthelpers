@@ -21,9 +21,9 @@ from collections.abc import Iterator
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
-PathIsh = Union[str, Path]
+PathIsh = str | Path
 
 
 def pathify(path: PathIsh) -> Path:
@@ -42,7 +42,7 @@ Json = dict[str, Any]  # todo Mapping?
 
 
 T = TypeVar('T')
-Res = Union[T, Exception]
+Res = T | Exception
 
 
 def make_parser(*, single_source: bool = False, package: str | None = None) -> argparse.ArgumentParser:
@@ -156,7 +156,7 @@ def json_items(p: Path, key: str | None) -> Iterator[Json]:
             # this may happen if the user requested a specific ijson backend (e.g. via IJSON_BACKEND)
             # worth being non-defensive in that case
             raise e
-        warnings.warn("recommended to 'pip install ijson' for faster json processing")
+        warnings.warn("recommended to 'pip install ijson' for faster json processing", stacklevel=3)
     else:
         extractor = 'item' if key is None else f'{key}.item'
         with p.open(mode='rb') as fo:
@@ -168,7 +168,7 @@ def json_items(p: Path, key: str | None) -> Iterator[Json]:
     except ModuleNotFoundError as e:
         if e.name != 'orjson':
             raise e
-        warnings.warn("recommended to 'pip install orjson' for faster json processing")
+        warnings.warn("recommended to 'pip install orjson' for faster json processing", stacklevel=3)
     else:
         j = orjson.loads(p.read_text())
         if key is not None:

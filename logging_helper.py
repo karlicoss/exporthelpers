@@ -5,11 +5,10 @@ import os
 import sys
 import warnings
 from functools import lru_cache
-from typing import Union
 
 
 def test() -> None:
-    from typing import Callable
+    from collections.abc import Callable
 
     M: Callable[[str], None] = lambda s: print(s, file=sys.stderr)
 
@@ -52,7 +51,7 @@ FORMAT_NOCOLOR = FORMAT.format(start='', end='')
 
 
 Level = int
-LevelIsh = Union[Level, str, None]
+LevelIsh = Level | str | None
 
 
 def mklevel(level: LevelIsh) -> Level:
@@ -133,7 +132,7 @@ def _setup_handlers_and_formatters(name: str) -> None:
         # try colorlog first, so user gets nice colored logs
         import colorlog
     except ModuleNotFoundError:
-        warnings.warn("You might want to 'pip install colorlog' for nice colored logs")
+        warnings.warn("You might want to 'pip install colorlog' for nice colored logs", stacklevel=3)
         formatter = logging.Formatter(FORMAT_NOCOLOR)
     else:
         # log_color/reset are specific to colorlog
@@ -220,7 +219,7 @@ def get_enlighten():
     try:
         import enlighten  # type: ignore[import-not-found]
     except ModuleNotFoundError:
-        warnings.warn("You might want to 'pip install enlighten' for a nice progress bar")
+        warnings.warn("You might want to 'pip install enlighten' for a nice progress bar", stacklevel=3)
 
         return Mock()
 
