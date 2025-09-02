@@ -21,7 +21,7 @@ from collections.abc import Iterator
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, TypeAlias, TypeVar
 
 PathIsh = str | Path
 
@@ -42,7 +42,7 @@ Json = dict[str, Any]  # todo Mapping?
 
 
 T = TypeVar('T')
-Res = T | Exception
+Res: TypeAlias = T | Exception
 
 
 def make_parser(*, single_source: bool = False, package: str | None = None) -> argparse.ArgumentParser:
