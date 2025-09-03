@@ -73,16 +73,16 @@ def make_parser(*, single_source: bool = False, package: str | None = None) -> a
     p.add_argument('-i', '--interactive', action='store_true', help='Start Ipython session to play with data')
 
     p.epilog = f"""
-You can use ={pkg}.dal= (stands for "Data Access/Abstraction Layer") to access your exported data, even offline.
-I elaborate on motivation behind it [[https://beepb00p.xyz/exports.html#dal][here]].
+You can use `{pkg}.dal` (stands for "Data Access/Abstraction Layer") to access your exported data, even offline.
+I elaborate on motivation behind it [here](https://beepb00p.xyz/exports.html#dal).
 
-- main usecase is to be imported as python module to allow for *programmatic access* to your data.
+- main usecase is to be imported as python module to allow for **programmatic access** to your data.
 
-  You can find some inspiration in [[https://beepb00p.xyz/mypkg.html][=my.=]] package that I'm using as an API to all my personal data.
+  You can find some inspiration in [`my.`](https://beepb00p.xyz/mypkg.html) package that I'm using as an API to all my personal data.
 
-- to test it against your export, simply run: ~python3 -m {pkg}.dal --source /path/to/export~
+- to test it against your export, simply run: `python3 -m {pkg}.dal --source /path/to/export`
 
-- you can also try it interactively: ~python3 -m {pkg}.dal --source /path/to/export --interactive~
+- you can also try it interactively in an Ipython shell: `python3 -m {pkg}.dal --source /path/to/export --interactive`
 
 """
     return p
