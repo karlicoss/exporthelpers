@@ -15,7 +15,7 @@ def test() -> None:
 
     ## prepare exception for later
     try:
-        None.whatever  # type: ignore[attr-defined]  # noqa: B018
+        None.whatever  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]  # noqa: B018
     except Exception as e:
         ex = e
     ##
@@ -228,7 +228,7 @@ def get_enlighten():
         return Mock()
 
     try:
-        import enlighten  # type: ignore[import-not-found]
+        import enlighten  # type: ignore[import-not-found]  # ty: ignore[unresolved-import]
     except ModuleNotFoundError:
         warnings.warn("You might want to 'pip install enlighten' for a nice progress bar", stacklevel=3)
 
