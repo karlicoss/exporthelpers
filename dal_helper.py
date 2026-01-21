@@ -8,25 +8,21 @@ from __future__ import annotations
 
 __all__ = [
     'Json',
-    'PathIsh',
     'Res',
     'pathify',
     'the',
 ]
 
 import argparse
-import sys
 import warnings
 from collections.abc import Iterator
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Any, TypeAlias, TypeVar
-
-PathIsh = str | Path
+from typing import TYPE_CHECKING, Any
 
 
-def pathify(path: PathIsh) -> Path:
+def pathify(path: Path | str) -> Path:
     """
     Helper mainly to support CPath hack
     See https://github.com/karlicoss/HPI/blob/be21606075cbc15018d1f36c2581ab138e4a44cc/tests/misc.py#L29-L32
@@ -41,8 +37,7 @@ def pathify(path: PathIsh) -> Path:
 Json = dict[str, Any]  # todo Mapping?
 
 
-T = TypeVar('T')
-Res: TypeAlias = T | Exception
+type Res[T] = T | Exception
 
 
 def make_parser(*, single_source: bool = False, package: str | None = None) -> argparse.ArgumentParser:
@@ -130,7 +125,7 @@ from collections.abc import Iterable
 # todo rename to only, like in more_itertools?
 # although it's not exactly the same, i.e. also checks that they are all equal..
 # and turning to a set() isn't always an option because it's a hash set
-def the(l: Iterable[T]) -> T:
+def the[T](l: Iterable[T]) -> T:
     it = iter(l)
     try:
         first = next(it)
@@ -185,13 +180,11 @@ def json_items(p: Path, key: str | None) -> Iterator[Json]:
     yield from j
 
 
-if sys.version_info[:2] >= (3, 11):
-    fromisoformat = datetime.fromisoformat
-else:
-    # fromisoformat didn't support Z as "utc" before 3.11
-    # https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat
+if not TYPE_CHECKING:
+    # TODO deprecate properly
 
-    def fromisoformat(date_string: str) -> datetime:
-        if date_string.endswith('Z'):
-            date_string = date_string[:-1] + '+00:00'
-        return datetime.fromisoformat(date_string)
+    # this was used before 3.12
+    fromisoformat = datetime.fromisoformat
+
+    # this is kinda useless in recent python since we have simple union type syntax
+    PathIsh = Path | str

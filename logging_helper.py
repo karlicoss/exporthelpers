@@ -5,6 +5,7 @@ import os
 import sys
 import warnings
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 
 def test() -> None:
@@ -247,6 +248,7 @@ if __name__ == '__main__':
 
 
 ## legacy/deprecated methods for backwards compatilibity
-LazyLogger = make_logger
-logger = make_logger
+if not TYPE_CHECKING:
+    LazyLogger = make_logger
+    logger = make_logger
 ##
